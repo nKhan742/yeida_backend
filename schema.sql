@@ -55,4 +55,5 @@ VALUES (1, 'YEIDA System Admin', 'admin@yeida.in', '9876543210', '$2a$10$wN9P3Pj
 
 -- Initial Standard Officer User (Password: user123)
 INSERT IGNORE INTO users (id, name, email, phone, password, role, designation) 
-VALUES (2, 'Rajesh Kumar', 'officer1@yeida.in', '9812345678', '$2a$10$wN9P3PjSj/O9uE.TzG/L2.h6H7R1vQ1f4jX8aQyFm4/W7bE2g0mC6', 'user', 'Senior Land Officer');
+VALUES (2, 'Ravish Kumar', 'officer1@yeida.in', '9812345678', '$2a$10$wN9P3PjSj/O9uE.TzG/L2.h6H7R1vQ1f4jX8aQyFm4/W7bE2g0mC6', 'user', 'Senior Land Officer');
+

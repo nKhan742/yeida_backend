@@ -6,7 +6,7 @@ const { pool } = require('../db');
 // In-Memory store fallback
 let mockUsersList = [
   { id: 1, name: 'YEIDA Admin', email: 'admin@yeida.in', phone: '9876543210', role: 'admin', designation: 'Super Administrator', status: 'active', created_at: new Date() },
-  { id: 2, name: 'Rajesh Officer', email: 'user@yeida.in', phone: '9812345678', role: 'user', designation: 'Field Data Officer', status: 'active', created_at: new Date() }
+  { id: 2, name: 'Ravish Kumar', email: 'user@yeida.in', phone: '9812345678', role: 'user', designation: 'Field Data Officer', status: 'active', created_at: new Date() }
 ];
 
 // Get all users (Admin only)
@@ -41,7 +41,7 @@ router.post('/create', async (req, res) => {
         'INSERT INTO users (name, email, phone, password, role, designation) VALUES (?, ?, ?, ?, ?, ?)',
         [name, email, phone, hashedPassword, userRole, userDesig]
       );
-      
+
       return res.status(201).json({
         message: 'User created successfully in MariaDB',
         userId: result.insertId
