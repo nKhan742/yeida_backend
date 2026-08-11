@@ -24,10 +24,12 @@ app.use('/uploads', express.static(uploadsDir));
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const entryRoutes = require('./routes/entries');
+const sectorRoutes = require('./routes/sectors');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/entries', entryRoutes);
+app.use('/api/sectors', sectorRoutes);
 
 app.get('/api/health', async (req, res) => {
   const dbConnected = await checkConnection();
