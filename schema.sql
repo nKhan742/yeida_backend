@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS land_entries (
   account_no VARCHAR(50),
   ifsc_code VARCHAR(20),
   cheque_doc VARCHAR(255),
-  status ENUM('pending', 'approved', 'rejected') DEFAULT 'approved',
+  status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

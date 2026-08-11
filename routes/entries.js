@@ -146,8 +146,8 @@ router.post(
           `INSERT INTO land_entries (
             entry_code, user_id, sector, village, khasra_no, total_area, farmer_name, farmer_share_area,
             registry_date, registry_by, compensation_amount, stamp_duty, registration_fees, total_amount,
-            phone, aadhaar_no, aadhaar_doc, pan_no, pan_doc, bank_name, account_no, ifsc_code, cheque_doc
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            phone, aadhaar_no, aadhaar_doc, pan_no, pan_doc, bank_name, account_no, ifsc_code, cheque_doc, status
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             entry_code,
             validUserId,
@@ -171,7 +171,8 @@ router.post(
             bank_name,
             account_no,
             ifsc_code,
-            chequeDocPath
+            chequeDocPath,
+            'pending'
           ]
         );
 
