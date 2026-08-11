@@ -18,7 +18,7 @@ const MOCK_USERS = [
   },
   {
     id: 2,
-    name: 'Rajesh Officer',
+    name: 'Ravish Kumar',
     email: 'user@yeida.in',
     phone: '9812345678',
     password: '$2a$10$wN9P3PjSj/O9uE.TzG/L2.h6H7R1vQ1f4jX8aQyFm4/W7bE2g0mC6', // user123
