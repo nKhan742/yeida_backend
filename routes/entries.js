@@ -130,6 +130,17 @@ router.post(
 
       const entry_code = `YEIDA/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`;
 
+      // Ensure valid integer user_id that exists in DB
+      let validUserId = parseInt(user_id) || 1;
+      try {
+        const [uRows] = await pool.query('SELECT id FROM users WHERE id = ?', [validUserId]);
+        if (uRows.length === 0) {
+          validUserId = 1; // Fallback to Admin User ID if user_id doesn't exist in cloud DB
+        }
+      } catch (err) {
+        validUserId = 1;
+      }
+
       try {
         const [result] = await pool.query(
           `INSERT INTO land_entries (
@@ -139,7 +150,7 @@ router.post(
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             entry_code,
-            user_id || 1,
+            validUserId,
             sector,
             village,
             khasra_no,
