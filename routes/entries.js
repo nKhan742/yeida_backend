@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const { pool } = require('../db');
 
 // Multer Storage Configuration
@@ -16,6 +17,19 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+const uploadsDir = path.join(__dirname, '../uploads');
+
+const deleteUploadedFiles = async (fileNames = []) => {
+  await Promise.all(
+    fileNames
+      .filter(Boolean)
+      .map((fileName) => {
+        const safeName = path.basename(fileName);
+        return fs.promises.unlink(path.join(uploadsDir, safeName)).catch(() => {});
+      })
+  );
+};
 
 // In-Memory store fallback for entries
 let mockEntries = [
@@ -89,6 +103,16 @@ router.get('/', async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Error fetching land entries' });
   }
+});
+
+router.get('/files/:fileName/download', (req, res) => {
+  const safeName = path.basename(req.params.fileName);
+  const filePath = path.join(uploadsDir, safeName);
+  res.download(filePath, safeName, (err) => {
+    if (err && !res.headersSent) {
+      res.status(404).json({ message: 'Uploaded file not found' });
+    }
+  });
 });
 
 // Create new Land Entry (Support up to 3 file fields: aadhaar_doc, pan_doc, cheque_doc)
@@ -295,6 +319,65 @@ router.put('/:id', upload.fields([
     res.status(500).json({ message: 'Failed to update entry' });
   }
 });
+
+const handleDeleteEntry = async (req, res) => {
+  const { id } = req.params;
+  const requesterUserId = req.header('x-user-id');
+  const requesterRole = req.header('x-user-role');
+
+  try {
+    try {
+      const [existing] = await pool.query(
+        'SELECT user_id, status, aadhaar_doc, pan_doc, cheque_doc FROM land_entries WHERE id = ?',
+        [id]
+      );
+
+      if (existing.length === 0) {
+        return res.status(404).json({ message: 'Entry not found.' });
+      }
+
+      if (existing[0].status !== 'pending') {
+        return res.status(403).json({ message: 'Only pending entries can be deleted.' });
+      }
+
+      if (requesterRole !== 'admin' && existing[0].user_id != requesterUserId) {
+        return res.status(403).json({ message: 'You can delete only your own pending entries.' });
+      }
+
+      await pool.query('DELETE FROM land_entries WHERE id = ? AND status = ?', [id, 'pending']);
+      await deleteUploadedFiles([existing[0].aadhaar_doc, existing[0].pan_doc, existing[0].cheque_doc]);
+
+      return res.json({ message: 'Pending entry deleted successfully.' });
+    } catch (dbErr) {
+      console.error('DB Delete error:', dbErr.message);
+      const idx = mockEntries.findIndex(e => e.id == id);
+
+      if (idx === -1) {
+        return res.status(404).json({ message: 'Entry not found.' });
+      }
+
+      if (mockEntries[idx].status !== 'pending') {
+        return res.status(403).json({ message: 'Only pending entries can be deleted.' });
+      }
+
+      if (requesterRole !== 'admin' && mockEntries[idx].user_id != requesterUserId) {
+        return res.status(403).json({ message: 'You can delete only your own pending entries.' });
+      }
+
+      const [deletedEntry] = mockEntries.splice(idx, 1);
+      await deleteUploadedFiles([deletedEntry.aadhaar_doc, deletedEntry.pan_doc, deletedEntry.cheque_doc]);
+
+      return res.json({ message: 'Pending entry deleted successfully.' });
+    }
+  } catch (err) {
+    console.error('Error deleting land entry:', err);
+    res.status(500).json({ message: 'Failed to delete entry' });
+  }
+};
+
+// Delete Land Entry (Allowed ONLY if status is still pending)
+router.delete('/:id', handleDeleteEntry);
+router.post('/:id/delete', handleDeleteEntry);
 
 // Admin Approve Land Entry
 router.put('/:id/approve', async (req, res) => {
